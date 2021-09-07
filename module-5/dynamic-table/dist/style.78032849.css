@@ -1,0 +1,45 @@
+/** Variables */
+
+:root {
+  --color-bg-light: #f1f1f1;
+  --color-text-dark: #2b2b2b;
+}
+
+/** Base*/
+html {
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  background-color: var(--color-bg-light);
+  padding: 30px;
+}
+
+/** Typography*/
+.heading-primary {
+  font-size: 50px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  font-weight: 100;
+  text-align: center;
+  color: var(--color-text-dark);
+}
+
+/** Table */
+table {
+  margin: 50px auto;
+}
+
+th,
+td,
+tb {
+  border: 1px solid #000;
+  padding: 10px 20px;
+}
+th {
+  text-transform: uppercase;
+  background-color: rgb(24, 211, 211);
+}
+
+
+/*# sourceMappingURL=/style.78032849.css.map */
