@@ -9,3 +9,12 @@ export const settings = {
     tableData: 'data/tableData.json',
   },
 };
+
+export const createElement = {
+  table: {
+    table: 'table',
+    row: 'tr',
+    header: 'th',
+    cell: 'td',
+  },
+};

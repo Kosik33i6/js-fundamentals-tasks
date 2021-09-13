@@ -19,7 +19,8 @@
   },
   {
     "_id": "5e9df38220c8ca67ea7903ae",
-    "name": "Francine Fleming",
+    "name": "Francine",
+    "registered": "2002-05-21T10:59:49.966Z",
     "age": 31,
     "gender": "female",
     "company": "ZEDALIS",
@@ -61,6 +62,7 @@
     "company": "UNCORP",
     "email": "pollardfarley@uncorp.com",
     "phone": "+1 (969) 592-2232",
+    "address": "1294 Marie Street Baltimore",
     "tags": [
       "commodo",
       "culpa",
@@ -115,6 +117,7 @@
     "company": "ZYPLE",
     "email": "beverleykramer@zyple.com",
     "phone": "+1 (873) 440-2676",
+    "registered": "2001-12-22T11:59:23.588Z",
     "tags": [
       "aliquip",
       "ipsum",

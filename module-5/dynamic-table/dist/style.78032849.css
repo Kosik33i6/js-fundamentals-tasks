@@ -1,7 +1,12 @@
 /** Variables */
 
 :root {
-  --color-bg-light: #f1f1f1;
+  --color-primary-dark: #2F80ED;
+  --color-primary-medium: #2D9CDB;
+  --color-primary-light: #56CCF2;
+  --color-bg-light-1: #f1f1f1;
+  --color-bg-light-2: #fbfbfb;
+  --color-bg-light-3: #BDBDBD;
   --color-text-dark: #2b2b2b;
 }
 
@@ -11,7 +16,7 @@ html {
 }
 
 body {
-  background-color: var(--color-bg-light);
+  background-color: var(--color-bg-light-1);
   padding: 30px;
 }
 
@@ -28,17 +33,24 @@ body {
 /** Table */
 table {
   margin: 50px auto;
+  box-shadow: 5px 5px 5px 3px var(--color-bg-light-3);
 }
 
 th,
 td,
 tb {
-  border: 1px solid #000;
-  padding: 10px 20px;
+  padding: 20px 30px;
+  background-color: var(--color-bg-light-2);
+  color: var(--color-text-dark);
+  border-bottom: 2px solid var(--color-primary-dark);
 }
 th {
   text-transform: uppercase;
-  background-color: rgb(24, 211, 211);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-weight: 600;
+  color: var(--color-text-dark);
 }
 
 

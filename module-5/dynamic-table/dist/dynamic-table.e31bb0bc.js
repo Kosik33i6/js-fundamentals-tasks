@@ -117,126 +117,13 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"components/Table.js":[function(require,module,exports) {
+})({"settings.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Table = /*#__PURE__*/function () {
-  function Table(data, tableContainer) {
-    _classCallCheck(this, Table);
-
-    if (!Array.isArray(data)) {
-      throw new Error('Argument data have to be a array');
-    }
-
-    if (tableContainer === undefined) {
-      throw new Error('Argument tableContainer cannot be undefind');
-    }
-
-    this.data = data;
-    this.getElements(tableContainer);
-  }
-
-  _createClass(Table, [{
-    key: "getElements",
-    value: function getElements(element) {
-      this.dom = {};
-      this.dom.tableContainer = element;
-    }
-  }, {
-    key: "getDataKeysForTableHeaderCells",
-    value: function getDataKeysForTableHeaderCells() {
-      var keys = Object.keys(this.data[0]);
-      return keys;
-    }
-  }, {
-    key: "renderTableHeaderCells",
-    value: function renderTableHeaderCells(keys) {
-      var _this = this;
-
-      if (!Array.isArray(keys)) {
-        throw new Error('Keys in initTableHeaderCells method have to be a array');
-      }
-
-      this.renderTableRow();
-      keys.forEach(function (key) {
-        var tableHeaderCell = document.createElement('th');
-        tableHeaderCell.innerHTML = key;
-
-        _this.dom.tableRow.appendChild(tableHeaderCell);
-      });
-    }
-  }, {
-    key: "renderTableCells",
-    value: function renderTableCells(data) {
-      var _this2 = this;
-
-      if (!Array.isArray(data)) {
-        throw new Error('Data in renderTableCells method have to be a array');
-      }
-
-      data.forEach(function (person) {
-        _this2.renderTableRow();
-
-        var personData = Object.values(person);
-        personData.forEach(function (value) {
-          var personDataValue = value;
-
-          if (Array.isArray(personDataValue)) {
-            personDataValue = value.join(', ');
-          }
-
-          var tableCell = document.createElement('td');
-          tableCell.innerHTML = personDataValue;
-
-          _this2.dom.tableRow.appendChild(tableCell);
-        });
-      });
-    }
-  }, {
-    key: "renderTableRow",
-    value: function renderTableRow() {
-      this.dom.tableRow = document.createElement('tr');
-      this.dom.table.appendChild(this.dom.tableRow);
-    }
-  }, {
-    key: "renderTable",
-    value: function renderTable() {
-      this.dom.table = document.createElement('table');
-      this.dom.tableContainer.appendChild(this.dom.table);
-      this.renderTableHeaderCells(this.getDataKeysForTableHeaderCells());
-      this.renderTableCells(this.data);
-    }
-  }, {
-    key: "init",
-    value: function init() {
-      console.log(this.dom);
-      this.renderTable();
-    }
-  }]);
-
-  return Table;
-}();
-
-var _default = Table;
-exports.default = _default;
-},{}],"settings.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.settings = exports.select = void 0;
+exports.createElement = exports.settings = exports.select = void 0;
 var select = {
   table: {
     tableContainer: '.dynamic-table'
@@ -249,7 +136,132 @@ var settings = {
   }
 };
 exports.settings = settings;
-},{}],"db/tableData.json":[function(require,module,exports) {
+var createElement = {
+  table: {
+    table: 'table',
+    row: 'tr',
+    header: 'th',
+    cell: 'td'
+  }
+};
+exports.createElement = createElement;
+},{}],"components/Table.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _settings = require("../settings");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Table = /*#__PURE__*/function () {
+  function Table(data, tableContainer) {
+    _classCallCheck(this, Table);
+
+    var isArray = Array.isArray(data);
+    if (!isArray) throw new Error('Argument data have to be an array');
+    var isUndefind = tableContainer === undefined;
+    if (isUndefind) throw new Error('Argument tableContainer cannot be undefind');
+    this.data = data;
+    this.keys = this.getDataKeysForTableHeaderCells(this.data);
+    this.getElements(tableContainer);
+  }
+
+  _createClass(Table, [{
+    key: "getElements",
+    value: function getElements(element) {
+      var isUndefind = element === undefined;
+      if (isUndefind) throw new Error('Argument element cannot be undefind');
+      this.domElements = {};
+      this.domElements.tableContainer = element;
+    }
+  }, {
+    key: "getDataKeysForTableHeaderCells",
+    value: function getDataKeysForTableHeaderCells(data) {
+      if (!Array.isArray(data)) throw new Error('Argument data in getDataKeysForTableHeaderCells method have to be a array');
+      var keys = [];
+      data.forEach(function (personData) {
+        for (var key in personData) {
+          if (!keys.includes(key)) {
+            keys.push(key);
+          }
+        }
+      });
+      return keys;
+    }
+  }, {
+    key: "renderTableHeaderCells",
+    value: function renderTableHeaderCells(keys) {
+      var _this = this;
+
+      if (!Array.isArray(keys)) throw new Error('Argument keys in initTableHeaderCells method have to be a array');
+      this.renderTableRow();
+      keys.forEach(function (key) {
+        var tableHeaderCell = document.createElement('th');
+        tableHeaderCell.innerHTML = key;
+
+        _this.domElements.tableRow.appendChild(tableHeaderCell);
+      });
+    }
+  }, {
+    key: "renderTableEntries",
+    value: function renderTableEntries(data, keys) {
+      var _this2 = this;
+
+      var isArray = Array.isArray(data) && Array.isArray(keys);
+      if (!isArray) throw new Error('Data adn keys in renderTableEntries method have to be a array');
+      data.forEach(function (person) {
+        _this2.renderTableRow();
+
+        keys.forEach(function (key) {
+          var tableCell = document.createElement(_settings.createElement.table.cell);
+          var keyValue = person[key];
+
+          if (Array.isArray(keyValue)) {
+            keyValue = keyValue.join(', ');
+          }
+
+          tableCell.innerHTML = keyValue !== undefined ? keyValue : '';
+
+          _this2.domElements.tableRow.appendChild(tableCell);
+        });
+      });
+    }
+  }, {
+    key: "renderTableRow",
+    value: function renderTableRow() {
+      this.domElements.tableRow = document.createElement(_settings.createElement.table.row);
+      this.domElements.table.appendChild(this.domElements.tableRow);
+    }
+  }, {
+    key: "renderTable",
+    value: function renderTable() {
+      this.domElements.table = document.createElement(_settings.createElement.table.table);
+      this.domElements.tableContainer.appendChild(this.domElements.table);
+      this.renderTableHeaderCells(this.keys);
+      this.renderTableEntries(this.data, this.keys);
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      console.log(this.domElements);
+      this.renderTable();
+    }
+  }]);
+
+  return Table;
+}();
+
+var _default = Table;
+exports.default = _default;
+},{"../settings":"settings.js"}],"db/tableData.json":[function(require,module,exports) {
 module.exports = [{
   "_id": "5e9df382fc302216f08b46b1",
   "name": "Ivy Mitchell",
@@ -261,7 +273,8 @@ module.exports = [{
   "tags": ["cupidatat", "et", "ad", "incididunt", "velit", "sint", "non"]
 }, {
   "_id": "5e9df38220c8ca67ea7903ae",
-  "name": "Francine Fleming",
+  "name": "Francine",
+  "registered": "2002-05-21T10:59:49.966Z",
   "age": 31,
   "gender": "female",
   "company": "ZEDALIS",
@@ -285,6 +298,7 @@ module.exports = [{
   "company": "UNCORP",
   "email": "pollardfarley@uncorp.com",
   "phone": "+1 (969) 592-2232",
+  "address": "1294 Marie Street Baltimore",
   "tags": ["commodo", "culpa", "eiusmod", "minim", "ipsum", "minim", "proident"]
 }, {
   "_id": "5e9df3820b489f341a421aa7",
@@ -312,6 +326,7 @@ module.exports = [{
   "company": "ZYPLE",
   "email": "beverleykramer@zyple.com",
   "phone": "+1 (873) 440-2676",
+  "registered": "2001-12-22T11:59:23.588Z",
   "tags": ["aliquip", "ipsum", "sint", "enim", "adipisicing", "et", "nostrud"]
 }, {
   "_id": "5e9df38208f097558c905bff",
@@ -391,7 +406,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59284" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49682" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

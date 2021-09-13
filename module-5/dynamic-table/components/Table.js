@@ -1,74 +1,85 @@
+import {createElement} from '../settings';
+
 class Table {
   constructor(data, tableContainer) {
-    if(!Array.isArray(data)) {
-      throw new Error('Argument data have to be a array');
-    }
-    if(tableContainer === undefined) {
-      throw new Error('Argument tableContainer cannot be undefind');
-    }
+    const isArray = Array.isArray(data);
+    if(!isArray) throw new Error('Argument data have to be an array');
+
+    const isUndefind = tableContainer === undefined;
+    if(isUndefind) throw new Error('Argument tableContainer cannot be undefind');
+
     this.data = data;
+    this.keys = this.getDataKeysForTableHeaderCells(this.data);
     this.getElements(tableContainer);
   }
 
   getElements(element) {
-    this.dom = {};
-    this.dom.tableContainer = element;
+    const isUndefind = element === undefined;
+    if(isUndefind) throw new Error('Argument element cannot be undefind');
 
+    this.domElements = {};
+    this.domElements.tableContainer = element;
   }
 
-  getDataKeysForTableHeaderCells() {
-    const keys = Object.keys(this.data[0]);
+  getDataKeysForTableHeaderCells(data) {
+    if(!Array.isArray(data)) throw new Error('Argument data in getDataKeysForTableHeaderCells method have to be a array');
+    const keys = [];
+    data.forEach(personData => {
+      for(const key in personData) {
+        if(!keys.includes(key)) {
+          keys.push(key);
+        }
+      }
+    })
     return keys;
   }
 
   renderTableHeaderCells(keys) {
-    if(!Array.isArray(keys)) {
-      throw new Error('Keys in initTableHeaderCells method have to be a array');
-    }
+    if(!Array.isArray(keys)) throw new Error('Argument keys in initTableHeaderCells method have to be a array');
+
     this.renderTableRow();
     keys.forEach(key => {
       const tableHeaderCell = document.createElement('th');
       tableHeaderCell.innerHTML = key;
-      this.dom.tableRow.appendChild(tableHeaderCell);
+      this.domElements.tableRow.appendChild(tableHeaderCell);
     });
   }
 
-  renderTableCells(data) {
-    if(!Array.isArray(data)) {
-      throw new Error('Data in renderTableCells method have to be a array');
-    }
+  renderTableEntries(data, keys) {
+    const isArray = Array.isArray(data) && Array.isArray(keys);
+    if(!isArray) throw new Error('Data adn keys in renderTableEntries method have to be a array');
+
     data.forEach(person => {
       this.renderTableRow();
-      const personData = Object.values(person);
+      keys.forEach(key => {
+        const tableCell = document.createElement(createElement.table.cell);
+        let keyValue = person[key];
 
-      personData.forEach(value => {
-        let personDataValue = value;
-        if(Array.isArray(personDataValue)) {
-          personDataValue = value.join(', ');
+        if(Array.isArray(keyValue)) {
+          keyValue = keyValue.join(', ');
         }
 
-        const tableCell = document.createElement('td');
-        tableCell.innerHTML = personDataValue;
-        this.dom.tableRow.appendChild(tableCell);
-
+        tableCell.innerHTML = keyValue !== undefined ? keyValue : '';
+        this.domElements.tableRow.appendChild(tableCell);
       });
     });
+
   }
 
   renderTableRow() {
-    this.dom.tableRow = document.createElement('tr');
-    this.dom.table.appendChild(this.dom.tableRow);
+    this.domElements.tableRow = document.createElement(createElement.table.row);
+    this.domElements.table.appendChild(this.domElements.tableRow);
   }
 
   renderTable() {
-    this.dom.table = document.createElement('table');
-    this.dom.tableContainer.appendChild(this.dom.table);
-    this.renderTableHeaderCells(this.getDataKeysForTableHeaderCells());
-    this.renderTableCells(this.data);
+    this.domElements.table = document.createElement(createElement.table.table);
+    this.domElements.tableContainer.appendChild(this.domElements.table);
+    this.renderTableHeaderCells(this.keys);
+    this.renderTableEntries(this.data, this.keys);
   }
 
   init() {
-    console.log(this.dom);
+    console.log(this.domElements);
     this.renderTable();
   }
 }
