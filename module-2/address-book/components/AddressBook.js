@@ -1,6 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import Group from './Group';
-import withContactsHandling from "./withContactsHandling";
+import withContactsHandling from './withContactsHandling';
 
 class AddressBook extends withContactsHandling {
   constructor(contactsList, groupList) {
@@ -19,7 +18,7 @@ class AddressBook extends withContactsHandling {
     const isNameHaveCorrectlyLength = name.length >= 2;
     if(!isNameHaveCorrectlyLength) throw new Error('Name length should be longer than two');
 
-    const group = new Group([], name, uuidv4());
+    const group = new Group();
     this.groupList.push(group);
   }
 

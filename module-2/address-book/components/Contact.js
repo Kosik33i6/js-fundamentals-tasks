@@ -1,23 +1,25 @@
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import isEmailValid from '../utils';
 
 class Contact {
-  constructor(name, surname, email, modificationDate, createDate, uuid) {
-    const contactDataArray = [name, surname, email, modificationDate, createDate, uuid];
-    contactDataArray.forEach(data => {
-      const isArgumentsAreString = typeof data === 'string';
-      if(!isArgumentsAreString) throw new Error('Arguments have to be a string');
+  constructor(name, surname, email) {
 
-      const isArgumentsHaveCorrectlyLength = data.length > 0;
-      if(!isArgumentsHaveCorrectlyLength) throw new Error('Arguments length must be greater then zero');
-    });
+    const isArgumentsAreString = typeof name === 'string' && typeof surname === 'string' && typeof email === 'string';
+    if(!isArgumentsAreString) throw new Error('Arguments have to be a string');
+
+    const isArgumentsHaveCorrectlyLength = name.length >= 2 && surname.length >=2;
+    if(!isArgumentsHaveCorrectlyLength) throw new Error('Arguments length must be greater then zero');
+
+    const isCorrectEmail = isEmailValid(email);
+    if(!isCorrectEmail) throw new Error('Incorrect email');
 
     this.name = name;
     this.surname = surname;
     this.email = email;
-    this.modificationDate = modificationDate;
-    this.createDate = createDate;
-    this.uuid = uuid;
+    this.modificationDate = moment().format('MMMM Do YYYY, h:mm:ss a');
+    this.createDate = moment().format('MMMM Do YYYY, h:mm:ss a');
+    this.uuid = uuidv4();
   }
 
   update(key, newValue) {
@@ -37,7 +39,7 @@ class Contact {
     const isString = typeof searchingValue === 'string';
     if(!isString) throw new Error('Argument searchingValue have to be a string');
 
-    const contact = `${this.name} ${this.surname}`.toLowerCase().trim();
+    const contact = `${this.name} ${this.surname} ${this.email}`.toLowerCase().trim();
     const regExpForSearchingValue = new RegExp(searchingValue.toLowerCase().trim(), 'g');
 
     return regExpForSearchingValue.test(contact);

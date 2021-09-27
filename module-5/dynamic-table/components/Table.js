@@ -1,5 +1,12 @@
 import {createElement} from '../settings';
 
+
+
+// ? 1 array methods / reduce
+
+// ? 3. promise methods, translate
+
+
 class Table {
   constructor(data, tableContainer) {
     const isArray = Array.isArray(data);
@@ -9,7 +16,8 @@ class Table {
     if(isUndefind) throw new Error('Argument tableContainer cannot be undefind');
 
     this.data = data;
-    this.keys = this.getDataKeysForTableHeaderCells(this.data);
+    this.keys = this.getDataKeysForTableHeaderCells();
+    console.log(this.keys);
     this.getElements(tableContainer);
   }
 
@@ -21,37 +29,36 @@ class Table {
     this.domElements.tableContainer = element;
   }
 
-  getDataKeysForTableHeaderCells(data) {
-    if(!Array.isArray(data)) throw new Error('Argument data in getDataKeysForTableHeaderCells method have to be a array');
-    const keys = [];
-    data.forEach(personData => {
-      for(const key in personData) {
-        if(!keys.includes(key)) {
-          keys.push(key);
-        }
-      }
-    })
-    return keys;
+  getDataKeysForTableHeaderCells() {
+    if(!Array.isArray(this.data)) throw new Error('Argument data in getDataKeysForTableHeaderCells method have to be a array');
+
+    const columnKeys = this.data.reduce((columns, personData) => {
+      const selectedKeys = Object.keys(personData);
+      const keys = new Set([...columns, ...selectedKeys]);
+      return keys;
+    }, []);
+
+    return Array.from(columnKeys);
   }
 
-  renderTableHeaderCells(keys) {
-    if(!Array.isArray(keys)) throw new Error('Argument keys in initTableHeaderCells method have to be a array');
+  renderTableHeaderCells() {
+    if(!Array.isArray(this.keys)) throw new Error('Argument keys in initTableHeaderCells method have to be a array');
 
     this.renderTableRow();
-    keys.forEach(key => {
-      const tableHeaderCell = document.createElement('th');
+    this.keys.forEach(key => {
+      const tableHeaderCell = document.createElement(createElement.table.header);
       tableHeaderCell.innerHTML = key;
       this.domElements.tableRow.appendChild(tableHeaderCell);
     });
   }
 
-  renderTableEntries(data, keys) {
-    const isArray = Array.isArray(data) && Array.isArray(keys);
+  renderTableEntries() {
+    const isArray = Array.isArray(this.data) && Array.isArray(this.keys);
     if(!isArray) throw new Error('Data adn keys in renderTableEntries method have to be a array');
 
-    data.forEach(person => {
+    this.data.forEach(person => {
       this.renderTableRow();
-      keys.forEach(key => {
+      this.keys.forEach(key => {
         const tableCell = document.createElement(createElement.table.cell);
         let keyValue = person[key];
 
@@ -74,12 +81,11 @@ class Table {
   renderTable() {
     this.domElements.table = document.createElement(createElement.table.table);
     this.domElements.tableContainer.appendChild(this.domElements.table);
-    this.renderTableHeaderCells(this.keys);
-    this.renderTableEntries(this.data, this.keys);
+    this.renderTableHeaderCells();
+    this.renderTableEntries();
   }
 
   init() {
-    console.log(this.domElements);
     this.renderTable();
   }
 }

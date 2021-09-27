@@ -1,5 +1,3 @@
-import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import isEmailValid from '../utils';
 import Contact from './Contact';
 
@@ -12,7 +10,7 @@ class withContactsHandling {
   }
 
   addContact(name, surname, email) {
-    const isArgumentsHaveCorrectlylength = name.length >= 2 && surname.length >= 2 && email.length >= 4
+    const isArgumentsHaveCorrectlylength = name.length >= 2 && surname.length >= 2 && email.length >= 4;
     if(!isArgumentsHaveCorrectlylength) throw new Error('Arguments are too short');
 
     const isArgumentHaveCorrectlyType = typeof name === 'string' && typeof surname === 'string' && typeof email === 'string';
@@ -21,13 +19,7 @@ class withContactsHandling {
     const isArgumentEmailValid = isEmailValid(email);
     if(!isArgumentEmailValid) throw new Error('Argument email is not a email');
 
-    const contactData= {
-      modificationDate: moment().format('MMMM Do YYYY, h:mm:ss a'),
-      createDate: moment().format('MMMM Do YYYY, h:mm:ss a'),
-      uuid: uuidv4(),
-    };
-
-    const contact = new Contact(name, surname, email, contactData.modificationDate, contactData.createDate, contactData.uuid);
+    const contact = new Contact(name, surname, email);
     this.contactsList.push(contact);
   }
 

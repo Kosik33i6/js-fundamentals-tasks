@@ -155,12 +155,26 @@ exports.default = void 0;
 
 var _settings = require("../settings");
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+// ? 1 array methods / reduce
+// ? 3. promise methods, translate
 var Table = /*#__PURE__*/function () {
   function Table(data, tableContainer) {
     _classCallCheck(this, Table);
@@ -170,7 +184,8 @@ var Table = /*#__PURE__*/function () {
     var isUndefind = tableContainer === undefined;
     if (isUndefind) throw new Error('Argument tableContainer cannot be undefind');
     this.data = data;
-    this.keys = this.getDataKeysForTableHeaderCells(this.data);
+    this.keys = this.getDataKeysForTableHeaderCells();
+    console.log(this.keys);
     this.getElements(tableContainer);
   }
 
@@ -184,27 +199,32 @@ var Table = /*#__PURE__*/function () {
     }
   }, {
     key: "getDataKeysForTableHeaderCells",
-    value: function getDataKeysForTableHeaderCells(data) {
-      if (!Array.isArray(data)) throw new Error('Argument data in getDataKeysForTableHeaderCells method have to be a array');
-      var keys = [];
-      data.forEach(function (personData) {
-        for (var key in personData) {
-          if (!keys.includes(key)) {
-            keys.push(key);
-          }
-        }
-      });
-      return keys;
+    value: function getDataKeysForTableHeaderCells() {
+      if (!Array.isArray(this.data)) throw new Error('Argument data in getDataKeysForTableHeaderCells method have to be a array');
+      var columnKeys = this.data.reduce(function (columns, personData) {
+        console.log('columns: ', columns);
+        var selectedKeys = Object.keys(personData);
+        var keys = new Set([].concat(_toConsumableArray(columns), _toConsumableArray(selectedKeys)));
+        return keys;
+      }, []); // this.data.forEach(personData => {
+      //   for(const key in personData) {
+      //     if(!keys.includes(key)) {
+      //       keys.push(key);
+      //     }
+      //   }
+      // });
+
+      return Array.from(columnKeys);
     }
   }, {
     key: "renderTableHeaderCells",
-    value: function renderTableHeaderCells(keys) {
+    value: function renderTableHeaderCells() {
       var _this = this;
 
-      if (!Array.isArray(keys)) throw new Error('Argument keys in initTableHeaderCells method have to be a array');
+      if (!Array.isArray(this.keys)) throw new Error('Argument keys in initTableHeaderCells method have to be a array');
       this.renderTableRow();
-      keys.forEach(function (key) {
-        var tableHeaderCell = document.createElement('th');
+      this.keys.forEach(function (key) {
+        var tableHeaderCell = document.createElement(_settings.createElement.table.header);
         tableHeaderCell.innerHTML = key;
 
         _this.domElements.tableRow.appendChild(tableHeaderCell);
@@ -212,15 +232,15 @@ var Table = /*#__PURE__*/function () {
     }
   }, {
     key: "renderTableEntries",
-    value: function renderTableEntries(data, keys) {
+    value: function renderTableEntries() {
       var _this2 = this;
 
-      var isArray = Array.isArray(data) && Array.isArray(keys);
+      var isArray = Array.isArray(this.data) && Array.isArray(this.keys);
       if (!isArray) throw new Error('Data adn keys in renderTableEntries method have to be a array');
-      data.forEach(function (person) {
+      this.data.forEach(function (person) {
         _this2.renderTableRow();
 
-        keys.forEach(function (key) {
+        _this2.keys.forEach(function (key) {
           var tableCell = document.createElement(_settings.createElement.table.cell);
           var keyValue = person[key];
 
@@ -245,13 +265,12 @@ var Table = /*#__PURE__*/function () {
     value: function renderTable() {
       this.domElements.table = document.createElement(_settings.createElement.table.table);
       this.domElements.tableContainer.appendChild(this.domElements.table);
-      this.renderTableHeaderCells(this.keys);
-      this.renderTableEntries(this.data, this.keys);
+      this.renderTableHeaderCells();
+      this.renderTableEntries();
     }
   }, {
     key: "init",
     value: function init() {
-      console.log(this.domElements);
       this.renderTable();
     }
   }]);
@@ -406,7 +425,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49682" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63210" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

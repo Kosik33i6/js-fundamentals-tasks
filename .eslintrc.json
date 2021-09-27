@@ -29,6 +29,14 @@
       "never"
     ],
     "no-unused-vars": "warn",
-    "no-useless-escape": "off"
+    "no-useless-escape": "off",
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      2,
+      "always"
+    ]
   }
 }
