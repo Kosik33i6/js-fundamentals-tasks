@@ -1,0 +1,13 @@
+.header {
+  height: 100vh;
+}
+
+.section-about,
+.section-contact {
+  height: 70vh;
+}
+
+.section-about {
+  background-color: teal;
+  position: relative;
+}

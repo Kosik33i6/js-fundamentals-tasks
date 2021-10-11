@@ -1,0 +1,1 @@
+{"version":3,"sources":["css/style.css"],"names":[],"mappings":"AAAA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA","file":"style.78032849.css","sourceRoot":"..","sourcesContent":[".header {\n  height: 100vh;\n}\n\n.section-about,\n.section-contact {\n  height: 70vh;\n}\n\n.section-about {\n  background-color: teal;\n  position: relative;\n}\n"]}
