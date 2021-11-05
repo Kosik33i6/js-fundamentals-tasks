@@ -15,9 +15,9 @@ const findPhraseInArray = (array, phrase) => {
   if(!isPhraseHaveCorrectlyLength) throw new Error('Argument phrase is too short');
 
   const arrayCopy = Array.from(array);
-  const regExpForSearchingPhrase = new RegExp(phrase.toLowerCase().trim(), 'g');
+  const regExpForSearchingPhrase = new RegExp(phrase.trim(), 'gi');
   const result = arrayCopy.reduce((accumulator, currentValue, index) => {
-    const isValueContainPhrase = regExpForSearchingPhrase.test(currentValue.toLowerCase().trim());
+    const isValueContainPhrase = regExpForSearchingPhrase.test(currentValue.trim());
     if(isValueContainPhrase) {
       accumulator.push([currentValue, index]);
     }

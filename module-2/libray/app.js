@@ -9,7 +9,6 @@ const user1 = new User('Marek', 'Węgrzyn');
 const user2 = new User('Michał', 'Bober');
 const users = [user1, user2];
 
-const booking = new Booking(user1, []);
 const image = document.createElement('img');
 
 const book1 = new Book('title1', 'author1', images[0], 'desription1');
@@ -22,7 +21,8 @@ const books = [book1, book2, book3, book4];
 // ! Libray
 const libray = new Libray(books, users);
 console.log(libray);
-// libray.borrowBookHandling(new Book('bookIsNotExist', 'noname', images[0], 'random description'), user2);
-libray.borrowBookHandling(book3, new User('Sylwia', 'Opala'));
+libray.borrowBooksFromLibray([book1, book4], user1);
+libray.returnBooksToLibray(libray.bookingList[0], [book1, book4]);
+
 
 

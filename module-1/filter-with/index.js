@@ -21,6 +21,9 @@ function filterWith(array, phrase) {
     if(isStringOrNumber) {
       return regExpForSearchingValue.test(item.toString().toLowerCase().trim());
     }
+
+    // item mzoe być obiektem lub arrayem
+
     const personDataValues = Object.values(item);
 
     const isIncludesPhrase = personDataValues.some(personValue => {

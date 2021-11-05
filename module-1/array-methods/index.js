@@ -68,9 +68,8 @@ export const filterFn = (array, callback) => {
   const arrayCopy = [...array];
   const newArray = [];
   for(let i = 0; i < arrayCopy.length; i +=1) {
-    console.log('array[i]');
-    const isCallbackReturnTrue = callback(arrayCopy[i], i, arrayCopy) === true;
-    console.log('isCallbackReturnTrue: ', isCallbackReturnTrue);
+   
+    const isCallbackReturnTrue = callback(arrayCopy[i], i, arrayCopy);
     if(isCallbackReturnTrue) {
       newArray.push(arrayCopy[i]);
     }
@@ -84,6 +83,7 @@ export const reduceFn = (array, callback, initial) => {
   let result;
   const arrayCopy = array;
   const isInitialUndefind = initial === undefined;
+  // const startsFrom  ...
   if(!isInitialUndefind) {
     for(let i = 0; i < arrayCopy.length; i += 1) {
       let currentInitial = i === 0 ? initial : result;

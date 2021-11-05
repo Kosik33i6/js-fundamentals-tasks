@@ -1,5 +1,5 @@
-const isDateObject = require( '@stdlib/assert-is-date-object' );
-
+const isDateAnObject = require( '@stdlib/assert-is-date-object' );
+// date instanceof Date
 // TODO: use STRATEGY PATTERN
 
 const InputObjectStrategy = function(input) {
@@ -25,7 +25,7 @@ const InputNumberStrategy = function(input) {
 };
 
 function getMyAge(input) {
-  const isObject = isDateObject(input);
+  const isObject = isDateAnObject(input);
   const isNumber = typeof input === 'number';
   const isString = typeof input === 'string';
 
@@ -34,30 +34,23 @@ function getMyAge(input) {
 
   const currentYear = new Date().getFullYear();
 
+  let output = null;
+
   if(isObject) {
-    const inputObject = new InputObjectStrategy(input);
-    return inputObject.setMyAge(currentYear);
+    output = new InputObjectStrategy(input);
   }
 
   if(isString) {
-    const inputString = new InputStringtStrategy(input);
-    return inputString.setMyAge(currentYear);
+    output = new InputStringtStrategy(input);
   }
 
   if(isNumber && Number.isInteger(input)) {
-    const inputNumber = new InputNumberStrategy(input);
-    return inputNumber.setMyAge(currentYear);
+    output = new InputNumberStrategy(input);
   }
 
-  // const regExpIsYear = /^[0-9]{4}/;
-  // ! is input date better validation
-
-
-  // ! za duża wartoś wieku walidacja
-  // ! wzorzec strategii
-  //  ? 3 max 4 if
+  return output.setMyAge(currentYear);
 }
-// console.log(isDateObject(new Date(1990, 1, 1)));
+
 const result1 = getMyAge(new Date(1990, 1, 1));
 const result2 = getMyAge('1990');
 const result3 = getMyAge(1990);

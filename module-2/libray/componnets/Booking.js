@@ -5,49 +5,33 @@ import WithBooksHandling from './WithBooksHandling';
 const moment = require('moment');
 
 class Booking extends WithBooksHandling {
-  constructor(user) {
-    super([]);
+  constructor(user, bookList) {
+    const isArgumentsAreArray = Array.isArray(bookList);
+    if(!isArgumentsAreArray) throw new Error('Argument bookList have to be an array');
+    super(bookList);
 
     this.classObjectValidator(user, User);
 
     this.user = user;
-    this.rentalDate = moment('09-22-2021').format('L');
+    this.rentalDate = moment().format('L');
     this.returnDate = moment(this.rentalDate, 'L').add(7, 'days').format('L');
-    // this.borrowedBookList = [];
     this.penalty = 0;
   }
 
-  // addBookToBorrowedBookList(book) {
-  //   this.classObjectValidator(book, Book);
-  //   this.borrowedBookList.push(book);
-  // }
-
-  // removeBookFromBorrowedBookList(book) {
-  //   this.classObjectValidator(book, Book);
-  //   const bookIndex = this.borrowedBookList.indexOf(book);
-  //   console.log(bookIndex);
-  //   const deleteCount = 1;
-  //   const removedBook = this.borrowedBookList.splice(bookIndex, deleteCount);
-  //   return removedBook;
-  // }
-
   returnBook(book) {
     this.classObjectValidator(book, Book);
+
     const currentDate = moment();
     const dayDifference = currentDate.diff(this.returnDate, 'days');
+    const returnedBook = this.removeBookFromBookList(book);
 
-    if(dayDifference > 0) {
+    const isChargePenalty = dayDifference > 0 && this.bookList.length === 0;
+    if(isChargePenalty) {
       this.penalty = dayDifference;
+      console.log('this.penalty: ', this.penalty);
     }
-    const returnedBook = this.removeBookFromBorrowedBookList(book);
     return returnedBook;
   }
-
-  // classObjectValidator(classInstance, classObject) {
-  //   const isBookInstance = classInstance instanceof classObject;
-  //   if(!isBookInstance) throw new Error('Argument have to ba a instance of class');
-  // }
-
 }
 
 export default Booking;
