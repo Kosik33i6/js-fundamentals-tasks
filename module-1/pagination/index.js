@@ -14,6 +14,11 @@ const paginateArray = (dataEntries, paginateSettings) => {
   const isArray = Array.isArray(dataEntries);
   if(!isArray) throw new Error('Argument dataEntries have to ba an array');
 
+
+
+
+  //  TODO upewnij sie ze paSettingsginate ma odpow strukturęąiine
+
   const {actualPageIdx, entriesOnPage} = paginateSettings;
   const numberOfPages = dataEntries.length % entriesOnPage === 0 ?
                         Math.floor(dataEntries.length / entriesOnPage) :

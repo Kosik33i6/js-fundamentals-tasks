@@ -4,8 +4,9 @@ import validators from '../utils';
 class Book {
   constructor(title, author, photo, description) {
     validators.forBook.isCorrectBookData(title, author, photo, description);
+
     this.title = title;
-    this.author =author;
+    this.author = author;
     this.photo = photo;
     this.description = description;
     this.uuid = uuidv4();

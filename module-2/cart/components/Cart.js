@@ -6,6 +6,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import CartItem from './CartItem';
+import Product from './Product';
 import validators from '../utlis';
 import actions from '../settigs';
 
@@ -21,25 +22,21 @@ class Cart {
     this.discountCode = couponCode.generate({ parts: 4, partLen: 6});
   }
 
-  addProduct(name, category, price, discount, amount) {
-    validators.forArray.isArray(category);
-    validators.forArray.isListOfStrings(category);
-    validators.forString.isCorrectString(name);
-    validators.forNumber.isPositive(price);
-    validators.forNumber.isCorrectDiscount(discount);
+  addProduct(product, amount) {
+    validators.forClassInstance.isInstanceOfClass(product, Product);
     validators.forNumber.isPositive(amount);
     validators.forNumber.isInteger(amount);
 
     const isCartContainProduct = this.productList.length > 0;
-    const isCartContainSameProduct = this.productList.some(product => product.name === name);
+    const isCartContainSameProduct = this.productList.some(cartItem => cartItem.product === product);
     if(!isCartContainProduct || !isCartContainSameProduct) {
-      const product = new CartItem(name, category, price, discount, amount);
-      this.productList.push(product);
+      const cartItem = new CartItem(product, amount);
+      this.productList.push(cartItem);
       return;
     }
 
-    const productInCart = this.searchProduct(name);
-    this.changeProductAmount(productInCart.name, amount);
+    const productInCart = this.searchProduct(product);
+    this.changeProductAmount(productInCart, amount);
   }
 
   removeProduct(index) {
@@ -48,46 +45,47 @@ class Cart {
     this.productList.splice(index, deleteCount);
   }
 
-  changeProductAmount(productName, amount, action = actions.productAmount.default) {
+  changeProductAmount(cartItem, amount, action = actions.productAmount.default) {
     validators.forNumber.isInteger(amount);
     validators.forNumber.isPositive(amount);
     validators.forActions.isCorrectActionToChangeAmount(action);
-    validators.forString.isCorrectString(productName);
-
-    const product = this.searchProduct(productName);
+    validators.forClassInstance.isInstanceOfClass(cartItem, CartItem);
 
     switch(action) {
       case actions.productAmount.increase:
-        product.increaseAmount();
+        cartItem.increaseAmount();
         break;
       case actions.productAmount.decrease:
-        product.decreaseAmount();
+        cartItem.decreaseAmount();
         break;
       case actions.productAmount.change:
-        product.updateAmount(amount);
+        cartItem.updateAmount(amount);
         break;
       default:
-        product.amount += amount;
+        cartItem.amount += amount;
         break;
     }
   }
 
-  searchProduct(productName) {
-    validators.forString.isCorrectString(productName);
+  searchProduct(product) {
+    validators.forClassInstance.isInstanceOfClass(product, Product);
 
-    const [product] = this.productList.filter(productData => productData.name === productName);
-    return product;
+    const [productInCart] = this.productList.filter(cartItem => cartItem.product === product);
+    return productInCart;
   }
 
   totalPrice() {
     let totalPrice = 0;
     const isCartContainProduct = this.productList.length > 0;
-    if(!isCartContainProduct) return 0;
+    if(!isCartContainProduct) return totalPrice;
 
     for(let i = 0; i < this.productList.length; i += 1) {
-      totalPrice += this.productList[i].getProductPriceAfterDiscount();
+      console.log(this.productList[i]);
+      totalPrice += this.productList[i].product.getProductPriceAfterDiscount();
     }
-    return totalPrice;
+
+    const percentage = 100;
+    return totalPrice - (totalPrice * (this.discount / percentage));
   }
 }
 

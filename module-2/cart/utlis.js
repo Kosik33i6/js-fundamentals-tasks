@@ -26,7 +26,7 @@ const validators = {
       const isArrayContainElements = array.length > 0;
       if(!isArrayContainElements) return;
 
-      const isArrayElementsHaveCorrectType =array.every(element => element instanceof classObject);
+      const isArrayElementsHaveCorrectType = array.every(element => element instanceof classObject);
       if(!isArrayElementsHaveCorrectType) throw new Error('Array elements have to be a instance of class');
     },
   },

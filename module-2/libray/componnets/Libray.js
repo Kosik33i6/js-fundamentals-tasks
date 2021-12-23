@@ -1,27 +1,75 @@
-import WithBooksHandling from './WithBooksHandling';
 import Booking from './Booking';
 import Book from './Book';
+import BookListElement from './BookListElement';
+import BookList from './BookList';
 import User from './User';
-import actions from '../settings';
+import {actions} from '../settings';
+import validators, {isBookExistInList, isBooksExistInList} from '../utils';
 
-class Libray extends WithBooksHandling {
-  constructor(bookList, userList = []) {
-    const isArgumentsAreArray = Array.isArray(bookList) && Array.isArray(userList);
-    if(!isArgumentsAreArray) throw new Error('Argument bookList and userList have to be an array');
+class Libray {
+  constructor(bookList = [], userList = []) {
+    // validators.forClassInstance.isInstanceOfClass(bookList, BookList);
+    validators.forArray.isArray(bookList);
+    validators.forArray.isInstanceOfClass(userList, User);
+    validators.forArray.isArray(userList);
 
-    super(bookList);
-    this.availableBookList = Array.from(bookList);
+    this.bookList = this.initBookList(Array.from(bookList));
+    this.availableBookList = this.initBookList(Array.from(bookList));
     this.userList = userList;
     this.bookingList = [];
   }
 
-  borrowBooksFromLibray(bookList, user) {
-    this.arrayLengthValidator(bookList);
-    this.arrayValidator(bookList);
-    this.arrayValidatorForInctanceOfTheClass(bookList, Book);
-    this.classObjectValidator(user, User);
+  initBookList(booksData) {
+    const bookList = new BookList(booksData);
+    return bookList;
+  }
 
-    const booksExistsInLibray = this.bookList.filter((librayBook) => bookList.some(book => librayBook === book));
+  addBooks(booksData) {
+    validators.forArray.isArray(booksData);
+    validators.forArray.isCorrectLength(booksData);
+
+    booksData.forEach(bookElement => {
+      const  {title, author, photo, description, amount} = bookElement;
+      this.bookList.addBook(title, author, photo, description, amount);
+      // this.updateAvailableBookList(book, amount, actions.bookList.add);
+    });
+  }
+
+  removeBooks(books) {
+    validators.forArray.isArray(books);
+    validators.forArray.isCorrectLength(books);
+
+    // books.forEach(bookElement => {
+    //   const  {title, author, photo, description, amount} =
+    //   this.bookList.removeBook(book, amount);
+    //   this.updateAvailableBookList(book, amount, actions.bookList.remove);
+    // });
+  }
+
+  updateAvailableBookList(book, amount, action) {
+    if(action === actions.bookList.remove) {
+        this.availableBookList.removeBook(book, amount);
+      } else if(action === actions.bookList.add) {
+        this.availableBookList.addBook(book, amount);
+      }
+  }
+
+
+  borrowBooksHandling(bookList, user) {;
+    validators.forArray.isCorrectLength(bookList);
+    validators.forArray.isArray(bookList);
+    validators.forArray.isInstanceOfClass(bookList, Book);
+    validators.forClassInstance.isInstanceOfClass(user, User);
+
+
+    // const {isExist, item} = Utils.isExistInList(bookings, booking, 'Errr...')
+    // const {isExist, item} = Utils.isExistInList(bookList, book)
+    // const {isExist, item} = Utils.isExistInList(userList, user)
+
+    const isBookExist = isBooksExistInList(this.bookList, bookList);
+
+
+    const booksExistsInLibray = this.bookList.filter((librayBook) => bookList.some(book => librayBook === book)); // po uuid
 
     const isBooksExistsInLibray = booksExistsInLibray.length > 0;
     if(!isBooksExistsInLibray) throw new Error('The library does not contain such a books');
@@ -31,10 +79,9 @@ class Libray extends WithBooksHandling {
     const isBooksAvailable = avaliableBooks.length > 0;
     if(!isBooksAvailable) throw new Error('The book is not available');
 
-    const isRegisteredUser = this.userList.includes(user);
-    if(!isRegisteredUser) {
-      this.addUser(user);
-    }
+    const isRegisteredUser = this.userList.some(user);
+    // TODO Error jeśli użytkownik nie istnieje
+    if(!isRegisteredUser) throw new Error('User is not Exist');
 
     const booking = new Booking(user, avaliableBooks);
     this.bookingList.push(booking);
@@ -42,11 +89,11 @@ class Libray extends WithBooksHandling {
     this.updateAvailableBookList(avaliableBooks, actions.remove);
   }
 
-  returnBooksToLibray(booking, books) {
-    this.arrayLengthValidator(books);
-    this.arrayValidator(books);
-    this.arrayValidatorForInctanceOfTheClass(books, Book);
-    this.classObjectValidator(booking, Booking);
+  returnBooksHandling(booking, books) {
+    validators.forArray.isCorrectLength(books);
+    validators.forArray.isArray(books);
+    validators.forArray.isInstanceOfClass(books, Book);
+    validators.forClassInstance.isInstanceOfClass(booking, Booking);
 
     const isBookingExistInBookingList = this.bookingList.some(bookingInList => bookingInList === booking);
     if(!isBookingExistInBookingList) throw new Error('Reservation does not exist');
@@ -65,33 +112,14 @@ class Libray extends WithBooksHandling {
     console.log(this.availableBookList);
   }
 
-  updateAvailableBookList(books, action) {
-    this.arrayLengthValidator(books);
-    this.arrayValidator(books);
-    this.arrayValidatorForInctanceOfTheClass(books, Book);
 
-    books.forEach(book => {
-      const bookIndex = this.availableBookList.indexOf(book);
-      const deleteCount = 1;
-      if(action === actions.remove) {
-        this.availableBookList.splice(bookIndex, deleteCount);
-      } else if(action === actions.add) {
-        this.availableBookList.push(book);
-      }
-    });
-  }
 
   addUser(name, surname) {
-    const isArgumentsHaveCorrectType = typeof name === 'string' && typeof surname === 'string';
-    if(!isArgumentsHaveCorrectType) throw new Error('Argument name and surname have to be a string');
-
-    const isArgumentsHaveCorrectLength = name.length >= 2 && surname.length >= 2;
-    if(!isArgumentsHaveCorrectLength) throw new Error('The minimum length of arguments is two');
+    validators.forUser.isCorrctUserData(name, surname);
 
     const user = new User(name, surname);
     this.userList.push(user);
   }
-
 }
 
 export default Libray;

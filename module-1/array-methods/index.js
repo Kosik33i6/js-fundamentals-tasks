@@ -13,9 +13,7 @@ import {arrayValidator, callbackValidator} from './utils';
 
 export const forEachFn = (array, callback) => {
   arrayValidator(array);
-  //  TODO: Add validation for callback
   callbackValidator(callback);
-  // TODO: copy of array
   const arrayCopy = [...array];
 
   for(let i = 0; i < arrayCopy.length; i += 1) {
@@ -25,11 +23,8 @@ export const forEachFn = (array, callback) => {
 
 export const mapFn = (array, callback) => {
   arrayValidator(array);
-  //  TODO: Add validation for callback
   callbackValidator(callback);
   const newArray = [];
-
-  // TODO: copy of array
   const arrayCopy = [...array];
 
   for(let i = 0; i < arrayCopy.length; i += 1) {
@@ -68,7 +63,7 @@ export const filterFn = (array, callback) => {
   const arrayCopy = [...array];
   const newArray = [];
   for(let i = 0; i < arrayCopy.length; i +=1) {
-   
+
     const isCallbackReturnTrue = callback(arrayCopy[i], i, arrayCopy);
     if(isCallbackReturnTrue) {
       newArray.push(arrayCopy[i]);

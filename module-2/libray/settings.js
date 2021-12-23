@@ -1,6 +1,20 @@
-const actions = {
-  remove: 'remove',
-  add: 'add',
+export const actions = {
+  bookList: {
+    remove: 'remove',
+    add: 'add',
+  },
+
+  bookAmount: {
+    change: 'change',
+    decrease: 'decrease',
+    increase: 'increase',
+    default: 'default',
+  },
 };
 
-export default actions;
+export const errors = {
+  book: {
+    isNotExist: 'Book is not exist',
+  },
+};
+
