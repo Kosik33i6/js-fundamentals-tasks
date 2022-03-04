@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "babel-node app.js"
   },
@@ -29,6 +30,7 @@
   "dependencies": {
     "@stdlib/assert-is-date-object": "^0.0.6",
     "coupon-code": "^0.4.5",
+    "dayjs": "^1.10.7",
     "is-url": "^1.2.4",
     "moment": "^2.29.1",
     "random-country": "^1.0.1",

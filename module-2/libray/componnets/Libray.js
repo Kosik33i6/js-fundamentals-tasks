@@ -3,122 +3,241 @@ import Book from './Book';
 import BookListElement from './BookListElement';
 import BookList from './BookList';
 import User from './User';
-import {actions} from '../settings';
-import validators, {isBookExistInList, isBooksExistInList} from '../utils';
+import { actions, BOOKS_DATA_PROPERTY, errors } from '../settings';
+import validators from '../validators';
 
 class Libray {
-  constructor(bookList = [], userList = []) {
-    // validators.forClassInstance.isInstanceOfClass(bookList, BookList);
-    validators.forArray.isArray(bookList);
-    validators.forArray.isInstanceOfClass(userList, User);
-    validators.forArray.isArray(userList);
+  constructor(userList = [], bookList) {
+    validators.forArray.isArray(
+      userList,
+      errors.forLibray.isTheUserListAnArray
+    );
+    validators.forArray.isInstanceOfClass(
+      userList,
+      User,
+      errors.forLibray.isTheArgumentAnInstanceOfTheCorrectClass
+    );
+    validators.forClassInstance.isInstanceOfClass(
+      bookList,
+      BookList,
+      errors.forLibray.isTheArgumentAnInstanceOfTheBookListClass
+    );
 
-    this.bookList = this.initBookList(Array.from(bookList));
-    this.availableBookList = this.initBookList(Array.from(bookList));
+    this.bookList = bookList;
+    this.availableBookList = this.initAvailableBookList(bookList);
     this.userList = userList;
     this.bookingList = [];
   }
 
-  initBookList(booksData) {
-    const bookList = new BookList(booksData);
-    return bookList;
+  initAvailableBookList({ bookList }) {
+    validators.forArray.isInstanceOfClass(bookList, BookListElement);
+
+    const cloneBookList = bookList.map((bookListElement) => {
+      const cloneBookListElement = Object.assign(
+        Object.create(Object.getPrototypeOf(bookListElement)),
+        bookListElement
+      );
+      return cloneBookListElement;
+    });
+
+    return new BookList(cloneBookList);
   }
 
   addBooks(booksData) {
     validators.forArray.isArray(booksData);
     validators.forArray.isCorrectLength(booksData);
 
-    booksData.forEach(bookElement => {
-      const  {title, author, photo, description, amount} = bookElement;
-      this.bookList.addBook(title, author, photo, description, amount);
-      // this.updateAvailableBookList(book, amount, actions.bookList.add);
+    this.booksDataChecker(booksData);
+
+    booksData.forEach((bookData) => {
+      this.bookList.addBook(bookData);
+      this.availableBookList.addBook(bookData);
     });
   }
 
-  removeBooks(books) {
-    validators.forArray.isArray(books);
-    validators.forArray.isCorrectLength(books);
+  removeBooks(booksData) {
+    validators.forArray.isArray(booksData);
+    validators.forArray.isCorrectLength(booksData);
 
-    // books.forEach(bookElement => {
-    //   const  {title, author, photo, description, amount} =
-    //   this.bookList.removeBook(book, amount);
-    //   this.updateAvailableBookList(book, amount, actions.bookList.remove);
-    // });
+    this.booksDataChecker(booksData);
+
+    booksData.forEach((bookData) => {
+      this.bookList.removeBook(bookData);
+      this.availableBookList.removeBook(bookData);
+    });
   }
 
-  updateAvailableBookList(book, amount, action) {
-    if(action === actions.bookList.remove) {
-        this.availableBookList.removeBook(book, amount);
-      } else if(action === actions.bookList.add) {
-        this.availableBookList.addBook(book, amount);
-      }
+  updateAvailableBookList(book, action) {
+    validators.forClassInstance.isInstanceOfClass(book, Book);
+
+    const BOOK_AMOUNT = 1;
+    const updatedBook = this.availableBookList.searchBook(book);
+
+    switch (action) {
+      case actions.bookAmount.decrease:
+        this.decreaseBookAmount(updatedBook, book, BOOK_AMOUNT);
+        break;
+      case actions.bookAmount.increase:
+        this.increaseBookAmount(updatedBook, book, BOOK_AMOUNT);
+        break;
+      default:
+        break;
+    }
   }
 
+  decreaseBookAmount(updatedBook, book, amount) {
+    if (this.availableBookList.getBookAmount(book) === 1) {
+      this.availableBookList.removeBook({ book, amount: 1 });
+    } else {
+      updatedBook.decreaseAmount(amount);
+    }
+  }
 
-  borrowBooksHandling(bookList, user) {;
-    validators.forArray.isCorrectLength(bookList);
+  increaseBookAmount(updatedBook, book, amount) {
+    if (!this.availableBookList.doesBookExistInList(book)) {
+      this.availableBookList.addBook({ book, amount: 1 });
+    } else {
+      updatedBook.increaseAmount(amount);
+    }
+  }
+
+  getBooking(bookList, user) {
     validators.forArray.isArray(bookList);
+    validators.forArray.isCorrectLength(bookList);
     validators.forArray.isInstanceOfClass(bookList, Book);
     validators.forClassInstance.isInstanceOfClass(user, User);
 
+    this.checkIfTheUserIsRegistered(user);
+    this.checkIfTheUserHasToPayPenalty(user);
+    this.checkIfTheBookExistInAvailableBookList(bookList);
+    this.checkIfTheBookIsAvailable(bookList);
+    this.checkIfTheUserIsNotBorrowingTheSameBooks(bookList);
 
-    // const {isExist, item} = Utils.isExistInList(bookings, booking, 'Errr...')
-    // const {isExist, item} = Utils.isExistInList(bookList, book)
-    // const {isExist, item} = Utils.isExistInList(userList, user)
+    if (this.doesTheUserHasBooking(user)) {
+      const userBooking = this.getUserBooking(user);
+      bookList.forEach((book) => {
+        userBooking.addBook(book);
+      });
+    } else {
+      const booking = new Booking(user, bookList);
+      this.bookingList.push(booking);
+    }
 
-    const isBookExist = isBooksExistInList(this.bookList, bookList);
-
-
-    const booksExistsInLibray = this.bookList.filter((librayBook) => bookList.some(book => librayBook === book)); // po uuid
-
-    const isBooksExistsInLibray = booksExistsInLibray.length > 0;
-    if(!isBooksExistsInLibray) throw new Error('The library does not contain such a books');
-
-    const avaliableBooks = this.availableBookList.filter((librayBook) => booksExistsInLibray.some(book => librayBook === book));
-
-    const isBooksAvailable = avaliableBooks.length > 0;
-    if(!isBooksAvailable) throw new Error('The book is not available');
-
-    const isRegisteredUser = this.userList.some(user);
-    // TODO Error jeśli użytkownik nie istnieje
-    if(!isRegisteredUser) throw new Error('User is not Exist');
-
-    const booking = new Booking(user, avaliableBooks);
-    this.bookingList.push(booking);
-
-    this.updateAvailableBookList(avaliableBooks, actions.remove);
+    bookList.forEach((book) => {
+      this.updateAvailableBookList(book, actions.bookAmount.decrease);
+    });
   }
 
-  returnBooksHandling(booking, books) {
-    validators.forArray.isCorrectLength(books);
-    validators.forArray.isArray(books);
-    validators.forArray.isInstanceOfClass(books, Book);
-    validators.forClassInstance.isInstanceOfClass(booking, Booking);
+  returnBooks(bookList, user) {
+    validators.forArray.isArray(bookList);
+    validators.forArray.isCorrectLength(bookList);
+    validators.forArray.isInstanceOfClass(bookList, Book);
+    validators.forClassInstance.isInstanceOfClass(user, User);
 
-    const isBookingExistInBookingList = this.bookingList.some(bookingInList => bookingInList === booking);
-    if(!isBookingExistInBookingList) throw new Error('Reservation does not exist');
+    this.checkIfTheUserIsRegistered(user);
+    this.checkIfTheBookExistsInTheLibrary(bookList);
 
-    const booksExistsInBooking = booking.bookList.filter(bookingBook => books.some(book => bookingBook === book));
+    if (!this.doesTheUserHasBooking(user)) {
+      throw new Error(errors.forUser.doesTheUserHasBooking);
+    }
+    const userBooking = this.getUserBooking(user);
 
-    const isBooksExistsInBooking = booksExistsInBooking.length === books.length;
-    if(!isBooksExistsInBooking) throw new Error('You didn\'t borrow those books');
-
-    const returnedBooks = books.reduce((previousValue, currentValue) => {
-      previousValue.push(booking.returnBook(currentValue));
-      return previousValue;
-    }, []);
-
-    this.updateAvailableBookList(returnedBooks, actions.add);
-    console.log(this.availableBookList);
+    bookList.forEach((book) => {
+      userBooking.returnBook(book);
+      this.updateAvailableBookList(book, actions.bookAmount.increase);
+    });
   }
 
+  getUserBooking(user) {
+    validators.forClassInstance.isInstanceOfClass(user, User);
 
+    const index = this.bookingList.findIndex(
+      (booking) => booking.user.uuid === user.uuid
+    );
+
+    return this.bookingList[index];
+  }
 
   addUser(name, surname) {
     validators.forUser.isCorrctUserData(name, surname);
 
     const user = new User(name, surname);
     this.userList.push(user);
+  }
+
+  doesTheUserHasBooking(user) {
+    const isUserHaveBooking = this.bookingList.some(
+      (booking) => booking.user.uuid === user.uuid
+    );
+    return isUserHaveBooking;
+  }
+
+  checkIfTheUserIsRegistered(user) {
+    const isRegisteredUser = this.userList.some(
+      (userInList) => userInList.uuid === user.uuid
+    );
+    if (!isRegisteredUser) throw new Error(errors.forUser.isTheUserRegistered);
+  }
+
+  checkIfTheUserHasToPayPenalty(user) {
+    const doesTheUserHasToPayPenalty = user.penalty === 0;
+    if (!doesTheUserHasToPayPenalty)
+      throw new Error(errors.forUser.doesTheUserHasToPayPenalty);
+  }
+
+  checkIfTheBookExistInAvailableBookList(bookList) {
+    bookList.forEach((book) => {
+      const doesTheBookExistInAvailableList = this.availableBookList.doesBookExistInList(
+        book
+      );
+      if (!doesTheBookExistInAvailableList)
+        throw new Error(errors.forBook.doesTheBookExistInAvailableList);
+    });
+  }
+
+  checkIfTheBookIsAvailable(bookList) {
+    bookList.forEach((book) => {
+      const isTheBookAvailable = this.availableBookList.getBookAmount(book) > 0;
+      if (!isTheBookAvailable)
+        throw new Error(errors.forBook.isTheBookAvailable);
+    });
+  }
+
+  checkIfTheBookExistsInTheLibrary(bookList) {
+    bookList.forEach((book) => {
+      const doesTheBookExistInLibray = this.bookList.doesBookExistInList(book);
+      if (!doesTheBookExistInLibray)
+        throw new Error(errors.forBook.doesTheBookExistInLibrary);
+    });
+  }
+
+  checkIfTheUserIsNotBorrowingTheSameBooks(booksData) {
+    const duplicates = booksData.filter((book, index, array) => {
+      const duplicatesBooksAmount = array.filter(
+        (item) => book.uuid === item.uuid
+      ).length;
+      if (duplicatesBooksAmount > 1) {
+        return true;
+      }
+      return false;
+    });
+
+    if (duplicates.length)
+      throw new Error(errors.forUser.doesTheUserBorrowDuplicates);
+  }
+
+  booksDataChecker(booksData) {
+    booksData.forEach((data) => {
+      const doesTheBookDataHaveAProperty =
+        Object.prototype.hasOwnProperty.call(data, BOOKS_DATA_PROPERTY.BOOK) &&
+        Object.prototype.hasOwnProperty.call(data, BOOKS_DATA_PROPERTY.AMOUNT);
+      if (!doesTheBookDataHaveAProperty) {
+        throw new Error(errors.forBook.doesTheBookDataHaveAProperty);
+      }
+      const { book, amount } = data;
+      validators.forClassInstance.isInstanceOfClass(book, Book);
+      validators.forNumbers.isPositiveInteger(amount);
+    });
   }
 }
 

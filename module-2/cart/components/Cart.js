@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid';
 import CartItem from './CartItem';
 import Product from './Product';
 import validators from '../utlis';
-import actions from '../settigs';
 
 const couponCode = require('coupon-code');
 
@@ -19,7 +18,7 @@ class Cart {
     this.productList = [];
     this.discount = discount;
     this.uuid = uuidv4();
-    this.discountCode = couponCode.generate({ parts: 4, partLen: 6});
+    this.discountCode = couponCode.generate({ parts: 4, partLen: 6 });
   }
 
   addProduct(product, amount) {
@@ -27,65 +26,72 @@ class Cart {
     validators.forNumber.isPositive(amount);
     validators.forNumber.isInteger(amount);
 
-    const isCartContainProduct = this.productList.length > 0;
-    const isCartContainSameProduct = this.productList.some(cartItem => cartItem.product === product);
-    if(!isCartContainProduct || !isCartContainSameProduct) {
+    const isCartContainSameProduct = this.productList.some(
+      (cartItem) => cartItem.product.uuid === product.uuid
+    );
+    if (!isCartContainSameProduct) {
       const cartItem = new CartItem(product, amount);
       this.productList.push(cartItem);
       return;
     }
 
     const productInCart = this.searchProduct(product);
-    this.changeProductAmount(productInCart, amount);
+    productInCart.increaseAmount(amount);
   }
 
-  removeProduct(index) {
-    validators.forNumber.isCorrectIndex(index, this.productList);
-    const deleteCount = 1;
-    this.productList.splice(index, deleteCount);
-  }
-
-  changeProductAmount(cartItem, amount, action = actions.productAmount.default) {
-    validators.forNumber.isInteger(amount);
+  removeProduct(product, amount) {
+    validators.forClassInstance.isInstanceOfClass(product, Product);
     validators.forNumber.isPositive(amount);
-    validators.forActions.isCorrectActionToChangeAmount(action);
-    validators.forClassInstance.isInstanceOfClass(cartItem, CartItem);
+    validators.forNumber.isInteger(amount);
 
-    switch(action) {
-      case actions.productAmount.increase:
-        cartItem.increaseAmount();
-        break;
-      case actions.productAmount.decrease:
-        cartItem.decreaseAmount();
-        break;
-      case actions.productAmount.change:
-        cartItem.updateAmount(amount);
-        break;
-      default:
-        cartItem.amount += amount;
-        break;
+    const isCartContainProduct = this.productList.some(
+      (cartItem) => cartItem.product.uuid === product.uuid
+    );
+    if (!isCartContainProduct)
+      throw new Error('The cart does not contain the product');
+
+    const removedProduct = this.searchProduct(product);
+
+    if (removedProduct.amount > amount) {
+      removedProduct.decreaseAmount(amount);
+    } else {
+      const index = this.getProductIndex(product);
+      const deleteCount = 1;
+      this.productList.splice(index, deleteCount);
     }
   }
 
   searchProduct(product) {
     validators.forClassInstance.isInstanceOfClass(product, Product);
+    const index = this.getProductIndex(product);
+    return this.productList[index];
+  }
 
-    const [productInCart] = this.productList.filter(cartItem => cartItem.product === product);
-    return productInCart;
+  getProductIndex(product) {
+    validators.forClassInstance.isInstanceOfClass(product, Product);
+    const index = this.productList.findIndex(
+      (productInList) => productInList.product.uuid === product.uuid
+    );
+    return index;
   }
 
   totalPrice() {
     let totalPrice = 0;
     const isCartContainProduct = this.productList.length > 0;
-    if(!isCartContainProduct) return totalPrice;
+    if (!isCartContainProduct) return 0;
 
-    for(let i = 0; i < this.productList.length; i += 1) {
-      console.log(this.productList[i]);
-      totalPrice += this.productList[i].product.getProductPriceAfterDiscount();
+    // TODO Use reduce
+    for (let i = 0; i < this.productList.length; i += 1) {
+      // TODO single product
+      totalPrice +=
+        this.productList[i].amount *
+        this.productList[i].product.getProductPriceAfterDiscount();
     }
 
     const percentage = 100;
-    return totalPrice - (totalPrice * (this.discount / percentage));
+    // TODO add cupon logic this.discountCode === arg totalPrice * (this.discount / percentage) --- totalPrice
+
+    return totalPrice - totalPrice * (this.discount / percentage);
   }
 }
 

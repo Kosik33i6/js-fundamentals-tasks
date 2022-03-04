@@ -1,68 +1,97 @@
-import validators, {isBookExistInList} from '../utils';
-import {errors} from '../settings';
 import BookListElement from './BookListElement';
 import Book from './Book';
+import validators from '../validators';
+import { errors } from '../settings';
+import inidDates from '../utils';
+
+const dayjs = require('dayjs');
+const relativeTime = require('dayjs/plugin/relativeTime');
+
+dayjs.extend(relativeTime);
 
 class BookList {
-  constructor(booksData) {
-    validators.forArray.isArray(booksData);
+  constructor(bookList) {
+    validators.forArray.isArray(
+      bookList,
+      errors.forBookList.isTheBookListAnArray
+    );
+    validators.forArray.isInstanceOfClass(
+      bookList,
+      BookListElement,
+      errors.forBookList.isTheBookListElementAnInstanceOfBookListElementClass
+    );
 
-    this.books = this.initBookListElement(booksData);
+    this.bookList = Array.from(bookList);
   }
 
-  initBookListElement(booksData) {
-    const list = booksData.map(bookData => {
-      const {title, author, photo, description, amount} = bookData;
-      const book = this.initBook(title, author, photo, description);
-      const bookListElement = new BookListElement(book, amount);
-      return bookListElement;
-    });
-
-    return list;
-  }
-
-  initBook(title, author, photo, description) {
-    const book = new Book(title, author, photo, description);
-    return book;
-  }
-
-  addBook(book, amount) {
+  addBook({ book, amount }, booking = false) {
     validators.forClassInstance.isInstanceOfClass(book, Book);
     validators.forNumbers.isPositiveInteger(amount);
 
-    const isExist = isBookExistInList(this.books, book);
-    if(!isExist) {
-      const bookListItem = new BookListElement(book, amount);
-      this.books.push(bookListItem);
+    const doesExist = this.doesBookExistInList(book);
+
+    if (!doesExist) {
+      const bookListElement = new BookListElement(book, amount);
+      // TODO pRzenieść logikę
+      // if (booking) bookListElement.initDates();
+      if (booking) {
+        inidDates(bookListElement);
+      }
+      this.bookList.push(bookListElement);
+    } else {
+      const bookFromList = this.searchBook(book);
+      bookFromList.increaseAmount(amount);
+    }
+  }
+
+  removeBook({ book, amount }) {
+    validators.forClassInstance.isInstanceOfClass(book, Book);
+    validators.forNumbers.isPositiveInteger(amount);
+
+    const isExist = this.doesBookExistInList(book);
+    if (!isExist) throw new Error(errors.forBook.doesTheBookExistInLibrary);
+
+    const bookToRemove = this.searchBook(book);
+
+    if (bookToRemove.amount > amount) {
+      bookToRemove.decreaseAmount(amount);
     } else {
       const index = this.getBookIndex(book);
-      this.books[index].increaseAmount(amount);
+      this.bookList.splice(index, 1);
     }
   }
 
-  removeBook(book, amount) {
+  searchBook(book) {
     validators.forClassInstance.isInstanceOfClass(book, Book);
-    validators.forNumbers.isPositiveInteger(amount);
-
-    const isExist = isBookExistInList(this.books, book);
-    if(!isExist) throw new Error(errors.book.isNotExist);
 
     const index = this.getBookIndex(book);
+    if (index === -1) throw new Error(errors.forBook.doesTheBookExist);
 
-    const bookAmount = this.books[index].amount;
-
-    const isPositiveAmount = (bookAmount - amount) >= 1;
-    if(!isPositiveAmount) {
-      this.books.splice(index, 1);
-    } else {
-      this.books[index].decreaseAmount(amount);
-    }
+    return this.bookList[index];
   }
 
   getBookIndex(book) {
-    return this.books.findIndex(listElement => listElement.book === book);
+    validators.forClassInstance.isInstanceOfClass(book, Book);
+
+    return this.bookList.findIndex(
+      (listElement) => listElement.book.uuid === book.uuid
+    );
   }
 
+  getBookAmount(book) {
+    validators.forClassInstance.isInstanceOfClass(book, Book);
+
+    return this.searchBook(book).amount;
+  }
+
+  doesBookExistInList(book) {
+    validators.forClassInstance.isInstanceOfClass(book, Book);
+
+    const doesExist = this.bookList.some(
+      (bookInList) => bookInList.book.uuid === book.uuid
+    );
+    return doesExist;
+  }
 }
 
 export default BookList;

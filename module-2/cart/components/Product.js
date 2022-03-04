@@ -2,17 +2,17 @@ import { v4 as uuidv4 } from 'uuid';
 import validators from '../utlis';
 
 class Product {
-  constructor(name, categoryList = [], price, discount = 0) {
+  constructor(categoryList = [], discount = 0, name, price) {
     validators.forArray.isArray(categoryList);
     validators.forArray.isListOfStrings(categoryList);
+    validators.forNumber.isCorrectDiscount(discount);
     validators.forString.isCorrectString(name);
     validators.forNumber.isPositive(price);
-    validators.forNumber.isCorrectDiscount(discount);
 
-    this.name = name;
     this.categoryList = categoryList;
-    this.price = price.toFixed(2);
     this.discount = discount;
+    this.name = name;
+    this.price = price.toFixed(2);
     this.uuid = uuidv4();
   }
 
@@ -34,26 +34,36 @@ class Product {
 
   getProductPriceAfterDiscount() {
     const percentage = 100;
-    const priceAfterDiscount = (this.price - (this.discount / percentage * this.price));
+    const priceAfterDiscount =
+      this.price - (this.discount / percentage) * this.price;
     return priceAfterDiscount;
   }
 
   addProductToCategory(category) {
     validators.forString.isCorrectString(category);
 
-    const isCategoryListInclude = this.categoryList.includes(category);
-    if(!isCategoryListInclude) {
-      this.categoryList.push(category);
-    }
+    const categoryRegExp = new RegExp(category.toLowerCase().trim(), 'g');
+    const isCategoryAlreadyMatchedProduct = this.categoryList.some(
+      (categoryInList) => categoryRegExp.test(categoryInList)
+    );
+
+    if (isCategoryAlreadyMatchedProduct)
+      throw new Error('This category is already assigned to the product');
+
+    this.categoryList.push(category);
   }
 
   removeProductFromCategory(category) {
     validators.forString.isCorrectString(category);
 
-    const index = this.categoryList.findIndex(categoryInList => categoryInList === category);
-    if(index) {
-      this.categoryList.splice(index, 1);
-    }
+    const foundIndex = this.categoryList.findIndex(
+      (categoryInList) => categoryInList === category
+    );
+
+    if (foundIndex === -1)
+      throw new Error('This category is not assigned to the product');
+
+    this.categoryList.splice(foundIndex, 1);
   }
 }
 

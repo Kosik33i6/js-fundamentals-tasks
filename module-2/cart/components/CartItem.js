@@ -6,7 +6,6 @@
 import validators from '../utlis';
 import Product from './Product';
 
-
 // brak funkcjonalnośc związanej z wiedzą odnośnie wartości pozycji
 class CartItem {
   constructor(product, amount) {
@@ -24,16 +23,20 @@ class CartItem {
     this.amount = newAmount;
   }
 
-  increaseAmount() {
-    this.amount += 1;
+  increaseAmount(newAmount) {
+    validators.forNumber.isPositive(newAmount);
+    validators.forNumber.isInteger(newAmount);
+    this.amount += newAmount;
   }
 
-  decreaseAmount() {
-    this.amount -= 1;
+  decreaseAmount(newAmount) {
+    validators.forNumber.isPositive(newAmount);
+    validators.forNumber.isInteger(newAmount);
+    this.amount -= newAmount;
   }
 
-  getTotalValue(){
-    // product.price * amount
+  getTotalValue() {
+    return this.product.price * this.amount;
   }
 }
 
