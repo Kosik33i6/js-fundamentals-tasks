@@ -81,7 +81,7 @@ class Libray {
         this.increaseBookAmount(updatedBook, book, BOOK_AMOUNT);
         break;
       default:
-        break;
+        throw new Error(`Action: ${action} doesnt exist.`);
     }
   }
 
@@ -216,13 +216,14 @@ class Libray {
       const duplicatesBooksAmount = array.filter(
         (item) => book.uuid === item.uuid
       ).length;
-      if (duplicatesBooksAmount > 1) {
-        return true;
-      }
-      return false;
+      return duplicatesBooksAmount > 1;
+      // if (duplicatesBooksAmount > 1) {
+      //   return true;
+      // }
+      // return false;
     });
 
-    if (duplicates.length)
+    if (duplicates.length === 0)
       throw new Error(errors.forUser.doesTheUserBorrowDuplicates);
   }
 

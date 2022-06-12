@@ -6,7 +6,7 @@ class Book {
   constructor(title, author, photo, description) {
     validators.forString.isCorrectString(
       title,
-      2,
+      2, // opcjonalny
       errors.forBook.doesBookHaveCorrectTitle
     );
     validators.forString.isCorrectString(
